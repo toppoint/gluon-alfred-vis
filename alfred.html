@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FFKI - Alfred JSON Status</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="stylesheet" type="text/css" href="css/list.css" />
+    
+    <script type="text/javascript" src="lib/frameworks/jquery-1.11.0.min.js"></script>
+    
+    <script>
+      var arr = [];
+
+      $(function() {
+        $.getJSON( 'alfred.json', function(data) {
+          $.each( data, function( key,val ) {
+            try {
+              arr.push({
+                hostname: val['hostname'],
+                address: val['network']['addresses'][0],
+                uptime: parseFloat(val['statistics']['uptime']),
+                tx: parseFloat(val['statistics']['traffic']['tx']['bytes']),
+                rx: parseFloat(val['statistics']['traffic']['rx']['bytes']),
+                firmware: val['software']['firmware']['release'],
+                model: val['hardware']['model'],
+                autoupdate: (val.software.autoupdater.enabled?val.software.autoupdater.branch:''),
+                contact: ('owner' in val?val['owner']['contact']:'')
+              });
+            } catch (e) {};
+          });
+
+          $('#headings th').click(function() {
+            var id = $(this).attr('id');
+            var asc = (!$(this).attr('asc')); // switch the order, true if not set
+
+            // set asc="asc" when sorted in ascending order
+            $('#headings th').each(function() {
+              $(this).removeAttr('asc');
+            });
+            if (asc) $(this).attr('asc', 'asc');
+
+            sortResults(id, asc);
+          });
+
+          sortResults('hostname', true);
+        });
+      });
+
+      function order(c) {
+        if (/^\d$/.test(c))
+          return 0;
+        else if (/^[a-z]$/i.test(c))
+          return c.charCodeAt(0);
+        else if (c === '~')
+          return -1;
+        else if (c)
+          return c.charCodeAt(0) + 256;
+        else
+          return 0;
+      }
+
+      // Based on dpkg code
+      function vercomp(a, b) {
+        var apos = 0, bpos = 0;
+        while (apos < a.length || bpos < b.length) {
+          var first_diff = 0;
+
+          while ((apos < a.length && !/^\d$/.test(a[apos])) || (bpos < b.length && !/^\d$/.test(b[bpos]))) {
+            var ac = order(a[apos]);
+            var bc = order(b[bpos]);
+
+            if (ac !== bc)
+              return ac - bc;
+
+            apos++;
+            bpos++;
+          }
+
+          while (a[apos] === '0')
+            apos++;
+          while (b[bpos] === '0')
+            bpos++;
+
+          while (/^\d$/.test(a[apos]) && /^\d$/.test(b[bpos])) {
+            if (first_diff === 0)
+              first_diff = a.charCodeAt(apos) - b.charCodeAt(bpos);
+
+            apos++;
+            bpos++;
+          }
+
+          if (/^\d$/.test(a[apos]))
+            return 1;
+
+          if (/^\d$/.test(b[bpos]))
+            return -1;
+
+          if (first_diff !== 0)
+            return first_diff;
+        }
+
+        return 0;
+      }
+
+      function compare(a, b) {
+        try {
+          a = a.toUpperCase();
+          b = b.toUpperCase();
+        } catch (e) {}
+
+        if (a == b) return 0;
+        else if (a > b) return 1;
+        else return -1;
+      }
+
+      function sortResults(prop, asc) {
+        for (var i = 0; i < arr.length; i++) {
+          arr[i].pos = i;
+        }
+
+        arr = arr.sort(function(a, b) {
+          var ret;
+
+          if (prop === 'firmware' || prop === 'model')
+            ret = vercomp(a[prop], b[prop]);
+          else
+            ret = compare(a[prop], b[prop]);
+
+          if (ret == 0) ret = compare(a.pos, b.pos);
+
+          if (asc) return ret;
+          else return -ret;
+        });
+        showResults();
+      }
+
+      function showResults () {
+        var html = '';
+        for (var e in arr) {
+          html += '<tr>'
+            +'<td><a target="_blank" href="http://['+arr[e].address+']/">'+arr[e].hostname+'</a></td>'
+            +'<td>'+Math.floor(arr[e].uptime/3600)+'h</td>'
+            +'<td>'+Math.floor(arr[e].tx/1048576)+'</td>'
+            +'<td>'+Math.floor(arr[e].rx/1048576)+'</td>'
+            +'<td>'+arr[e].firmware+'</td>'
+            +'<td>'+arr[e].model+'</td>'
+            +'<td>'+arr[e].autoupdate+'</td>'
+            +'<td>'+arr[e].contact+'</td>'
+            +'</tr>';
+        }
+        $('#results').html(html);
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1><a href="/" id="sitelink">kiel.freifunk.net</a></h1>
+      <ul>
+        <li><a href="graph.html">Graph</a></li>
+        <li><a href="geomap.html">Karte</a></li>
+        <li><a href="list.html">Liste</a></li>
+      </ul>
+    </header>
+    <div class="container">
+      <h1>Knotenliste</h1>
+      <table id="list"></table>
+    </div>
+    <table id="list" class="tablesorter tablesorter-default">
+      <thead id="headings">
+        <tr class="tablesorter-headerRow">
+          <th id="hostname">hostname</th>
+          <th id="uptime">uptime</th>
+          <th id="tx">tx (mb)</th>
+          <th id="rx">rx (mb)</th>
+          <th id="firmware">firmware</th>
+          <th id="model">model</th>
+          <th id="autoupdate">autoupdate</th>
+          <th id="contact">contact</th>
+        </tr>
+      </thead>
+      <tbody id="results">
+        <!-- this will be auto-populated -->
+      </tbody>
+    </table>
+  </body>
+</html>
