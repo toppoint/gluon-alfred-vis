@@ -23,7 +23,9 @@
                 firmware: val['software']['firmware']['release'],
                 model: val['hardware']['model'],
                 autoupdate: (val.software.autoupdater.enabled?val.software.autoupdater.branch:''),
-                contact: ('owner' in val?val['owner']['contact']:'')
+                contact: ('owner' in val?val['owner']['contact']:''),
+                longitude: ('location' in val?val['location']['longitude']:''),
+                latitude: ('location' in val?val['location']['latitude']:'')
               });
             } catch (e) {};
           });
@@ -145,6 +147,8 @@
             +'<td>'+arr[e].model+'</td>'
             +'<td>'+arr[e].autoupdate+'</td>'
             +'<td>'+arr[e].contact+'</td>'
+            +'<td>'+arr[e].longitude+'</td>'
+            +'<td>'+arr[e].latitude+'</td>'
             +'</tr>';
         }
         $('#results').html(html);
@@ -175,6 +179,8 @@
           <th id="model">model</th>
           <th id="autoupdate">autoupdate</th>
           <th id="contact">contact</th>
+          <th id="longitude">long</th>
+          <th id="latitude">lat</th>
         </tr>
       </thead>
       <tbody id="results">
