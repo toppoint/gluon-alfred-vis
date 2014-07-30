@@ -21,6 +21,7 @@
       var cols = [
         "hostname", 
         "uptime",
+        "offline",
         "tx",
         "rx",
         "firmware",
@@ -35,8 +36,9 @@
         "mem"
       ];
       
-      function fill_arr(key,val){
+      function fill_arr(key,val,offline){
             var n = [];
+            n.offline=offline;
             try { n.hostname=val['hostname']                                                        ; } catch (e) {console.log('no')};
             try { n.fastd_enabled= val['software']['fastd']['enabled']?1:0                          ; } catch (e) {};
             try { n.address= val['network']['addresses'][0]                                     ; } catch (e) {};
@@ -69,10 +71,20 @@
             arr.push(n);
       }
       
+      // forst add offline nodes
+      $(function() {
+        $.getJSON( 'alfred_offline.json', function(data) {
+          $.each( data, function( key,val ) {
+            fill_arr(key,val,1)
+          });
+        });
+      });
+
+      // add online nodes
       $(function() {
         $.getJSON( 'alfred.json', function(data) {
           $.each( data, function( key,val ) {
-            fill_arr(key,val)
+            fill_arr(key,val,0)
           });
 
           $('#headings th').click(function() {
@@ -91,7 +103,8 @@
           sortResults('hostname', true);
         });
       });
-
+      
+      
       function order(c) {
         if (/^\d$/.test(c))
           return 0;
@@ -183,9 +196,11 @@
       function showResults () {
         var html = '';
         for (var e in arr) {
+          offllineclass=(arr[e].offline==1?' class="offline"':'')
           html += '<tr>'
             +'<td><a target="_blank" href="http://['+arr[e].address+']/">'+arr[e].hostname+'</a></td>'
-            +'<td>'+Math.floor(arr[e].uptime/3600)+'h</td>'
+            +'<td'+offllineclass+'>'+Math.floor(arr[e].uptime/3600)+'h</td>'
+            +'<td'+offllineclass+'>'+(arr[e].offline?"offline":'')+'</td>'
             +'<td>'+Math.floor(arr[e].tx/1048576)+'</td>'
             +'<td>'+Math.floor(arr[e].rx/1048576)+'</td>'
             +'<td>'+arr[e].firmware+'</td>'
@@ -229,6 +244,7 @@
         <tr class="tablesorter-headerRow">
           <th id="hostname">hostname</th>
           <th id="uptime">uptime</th>
+          <th id="offline">offline</th>
           <th id="tx">tx (mb)</th>
           <th id="rx">rx (mb)</th>
           <th id="firmware">firmware</th>
