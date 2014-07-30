@@ -8,5 +8,5 @@ cp alfred.json logs/alfred_`date "+%y%m%d-%H%M%S"`.json
 cat alfred.json | python alfred-log.py
 
 # to download the alfred json file every 10 minutes add this to your crontab:
-#*/10 * * * * some_user cd /path/to/gluon-alfred-vis; bash update-json.sh > /dev/null
+#*/10 * * * * some_user cd /path/to/www/gluon-alfred-vis; bash /path/to/bin/update-json.sh > /dev/null
 
