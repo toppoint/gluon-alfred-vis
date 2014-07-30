@@ -1,0 +1,11 @@
+#list tbody tr td:nth-child(2) {
+  background: lightgreen;
+}
+
+#list tbody tr.online td:nth-child(2) {
+  background: transparent;
+}
+
+.offline {
+  background: #FFB6C1 !important;
+}
