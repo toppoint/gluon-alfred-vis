@@ -15,7 +15,7 @@ fi
 
 cd "${WWWPATH}"
 
-curl -o alfred.json "$url"
+curl -o alfred.json "$URL"
 
 mkdir -p logs/nodes
 cp alfred.json logs/alfred_$(date +%y%m%d-%H%M%S).json
