@@ -7,9 +7,11 @@ URL="$3"
 # call this script regularly as a cron job to get the latest alfred.json file
 
 if [ $# -ne 3 ] ; then
-  echo "ERROR: wrong number of parameters"
-  echo
-  echo "Syntax: $0 /path/to/bin /path/to/www http://.../alfred.json"
+  if [ "$1" -ne "--help" ]; then
+	echo "ERROR: wrong number of parameters "$#
+    echo
+  fi
+  echo "Syntax: $0 /path/to/bin /path/to/www http://freifunk.path/to/.../alfred.json"
   exit 1
 fi
 
