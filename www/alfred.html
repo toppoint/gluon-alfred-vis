@@ -35,9 +35,7 @@
         "mem"
       ];
       
-      $(function() {
-        $.getJSON( 'alfred.json', function(data) {
-          $.each( data, function( key,val ) {
+      function fill_arr(key,val){
             var n = [];
             try { n.hostname=val['hostname']                                                        ; } catch (e) {console.log('no')};
             try { n.fastd_enabled= val['software']['fastd']['enabled']?1:0                          ; } catch (e) {};
@@ -69,6 +67,12 @@
             try { n.latitude= ('location' in val?val['location']['latitude']:'')                    ; } catch (e) {};
             try { n.mac= key                                                                        ; } catch (e) {};
             arr.push(n);
+      }
+      
+      $(function() {
+        $.getJSON( 'alfred.json', function(data) {
+          $.each( data, function( key,val ) {
+            fill_arr(key,val)
           });
 
           $('#headings th').click(function() {
