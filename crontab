@@ -1,0 +1,2 @@
+# to download the alfred json file every 10 minutes:
+*/10 * * * * www-data /opt/ff/gluon-alfred-vis/bin/update-json.sh /opt/ff/gluon-alfred-vis/bin /opt/ff/gluon-alfred-vis/www http://.../alfred.json > /dev/null
