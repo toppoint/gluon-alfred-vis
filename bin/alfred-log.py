@@ -1,12 +1,16 @@
-import json, sys, os
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
-# call with 
-# cat alfred.json | python alfred-log.py
+"""
+Syntax: python alfred-log.py < alfred.json
+"""
+
+import json, sys, os
 
 try:
   nodes=json.load(sys.stdin)
 except:
-  sys.exit('No JSON object could be decoded; Input size:')
+  sys.exit('No JSON object could be decoded')
 
 folder='logs/nodes/'
 lb="\n"
@@ -17,7 +21,7 @@ for i in nodes:
     json.dump(nodes[i], fp)
     fp.close()
     hostnames.append(nodes[i]['hostname'])
-        
+
 # offline nodes:
 offline=open('alfred_offline.json', 'wb')
 offline.write('{')
