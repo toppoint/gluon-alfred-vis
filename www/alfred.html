@@ -19,6 +19,10 @@
 		return false;
 	}
 	
+	// each single node has its own json logged here:
+	path_to_node_json='http://freifunk.discovibration.de/gluon-alfred-vis/www/logs/nodes/';
+
+	// all column heads:
 	var cols = [
 		"hostname", 
 		"uptime",
@@ -38,56 +42,64 @@
 	];
 	
 	function fill_arr(key,val,offline){
-		var n = [];
-		n.offline=offline;
-		try { n.hostname=val['hostname']															; } catch (e) {console.log('no')};
-		try { n.fastd_enabled= val['software']['fastd']['enabled']?1:0								; } catch (e) {};
-		try { n.address= val['network']['addresses'][0]												; } catch (e) {};
-		if(val['statistics'] == null) {
-			n.uptime=0;
-			n.tx=0;
-			n.rx=0;
-			n.idletime= 0;
-			n.processes_running= 0;
-			n.loadavg=0;
-			n.mem=0;
-		} else {
-			try { n.uptime=parseFloat(val['statistics']['uptime'])									; } catch (e) {};
-			try { n.tx= parseFloat(val['statistics']['traffic']['tx']['bytes'])						; } catch (e) {};
-			try { n.rx= parseFloat(val['statistics']['traffic']['rx']['bytes'])						; } catch (e) {};
-			try { n.idletime= Math.floor(parseFloat(val['statistics']['idletime'])/3600)+'h'		; } catch (e) {};
-			try { n.processes_running= val['statistics']['processes']['running']					; } catch (e) {};
-			try { n.loadavg= parseFloat(val['statistics'] != null?val['statistics']['loadavg']:0)	; } catch (e) {};
-			try { 
-				n.mem= parseFloat(val['statistics']['memory'] != null?val['statistics']['memory']['free']:1.0) / parseFloat(val['statistics']['memory'] != null?val['statistics']['memory']['total']:0);
-			} catch (e) {};
+		if(key=="additional_data"){
+			// added by alfred-log.py in alfred_offline.json
+			$('#headline').append(" ("+val['datetime']+")")
+		}else{
+			var n = [];
+			n.offline=offline;
+			try { n.hostname=val['hostname']															; } catch (e) {console.log('no')};
+			try { n.fastd_enabled= val['software']['fastd']['enabled']?1:0								; } catch (e) {};
+			try { n.address= val['network']['addresses'][0]												; } catch (e) {};
+			if(val['statistics'] == null) {
+				n.uptime=0;
+				n.tx=0;
+				n.rx=0;
+				n.idletime= 0;
+				n.processes_running= 0;
+				n.loadavg=0;
+				n.mem=0;
+			} else {
+				try { n.uptime=parseFloat(val['statistics']['uptime'])									; } catch (e) {};
+				try { n.tx= parseFloat(val['statistics']['traffic']['tx']['bytes'])						; } catch (e) {};
+				try { n.rx= parseFloat(val['statistics']['traffic']['rx']['bytes'])						; } catch (e) {};
+				try { n.idletime= Math.floor(parseFloat(val['statistics']['idletime'])/3600)+'h'		; } catch (e) {};
+				try { n.processes_running= val['statistics']['processes']['running']					; } catch (e) {};
+				try { n.loadavg= parseFloat(val['statistics'] != null?val['statistics']['loadavg']:0)	; } catch (e) {};
+				try { 
+					n.mem= parseFloat(val['statistics']['memory'] != null?val['statistics']['memory']['free']:1.0) / parseFloat(val['statistics']['memory'] != null?val['statistics']['memory']['total']:0);
+				} catch (e) {};
+			}
+			try { n.firmware=val.software?val['software']['firmware']['release']:"-"					;} catch (e) {};
+			try { n.model= val['hardware']?val['hardware']['model']:"-"									; } catch (e) {};
+			try { n.autoupdate= val.software?(val.software.autoupdater.enabled?val.software.autoupdater.branch:''):'-'	; } catch (e) {};
+			try { n.contact= ('owner' in val?val['owner']['contact']:'')								; } catch (e) {};
+			try { n.longitude= ('location' in val?val['location']['longitude']:'')						; } catch (e) {};
+			try { n.latitude= ('location' in val?val['location']['latitude']:'')						; } catch (e) {};
+			try { n.mac= key																			; } catch (e) {};
+			arr.push(n);
 		}
-		try { n.firmware= val['software']['firmware']['release']									; } catch (e) {};
-		try { n.model= val['hardware']['model']														; } catch (e) {};
-		try { n.autoupdate= (val.software.autoupdater.enabled?val.software.autoupdater.branch:'')	; } catch (e) {};
-		try { n.contact= ('owner' in val?val['owner']['contact']:'')								; } catch (e) {};
-		try { n.longitude= ('location' in val?val['location']['longitude']:'')						; } catch (e) {};
-		try { n.latitude= ('location' in val?val['location']['latitude']:'')						; } catch (e) {};
-		try { n.mac= key																			; } catch (e) {};
-		arr.push(n);
 	}
-	
-	// forst add offline nodes
+
 	$(function() {
+		// first add offline nodes
+		var count_offline=0
 		$.getJSON( 'alfred_offline.json', function(data) {
+			count_offline--; // first element is "additional_data"
 			$.each( data, function( key,val ) {
 				fill_arr(key,val,1)
+				count_offline++
 			});
 		});
-	});
 
-	// add online nodes
-	$(function() {
+		// add online nodes
+		var count_online=0
 		$.getJSON( 'alfred.json', function(data) {
 			$.each( data, function( key,val ) {
 				fill_arr(key,val,0)
+				count_online++
 			});
-
+			
 			$('#headings th').click(function() {
 				var id = $(this).attr('id');
 				var asc = (!$(this).attr('asc')); // switch the order, true if not set
@@ -102,10 +114,13 @@
 			});
 
 			sortResults('hostname', true);
+
+			$('#headline').append(" "+count_online+" online");
+			$('#headline').append(" "+count_offline+" offline");
 		});
+	
 	});
-	
-	
+
 	function order(c) {
 		if (/^\d$/.test(c))
 			return 0;
@@ -220,11 +235,14 @@
 					if(p!="pos") html += p + ':' + arr[e][p] + '<br>';
 				}
 			}
-			html +='</td>'
+			html +='<a href="'+path_to_node_json+arr[e].hostname+'" target="_blank">data</a></td>'
 				+'</tr>';
 		}
 		$('#results').html(html);
+		$('#results').append(arr.length+" Eintr&auml;ge");
+		if(arr.length==0) alert("Fehler: kein Eintrag!");
 	}
+	
 	</script>
 </head>
 <body>
@@ -237,7 +255,7 @@
 		</ul>
 	</header>
 	<div class="container">
-	<h1>Knotenliste</h1>
+	<h1 id="headline">Knotenliste</h1>
 	<table id="list"></table>
 	</div>
 	<table id="list" class="tablesorter tablesorter-default">
@@ -262,7 +280,7 @@
 		</tr>
 	</thead>
 	<tbody id="results">
-		<tr><td colspan="0" style="text-align:center;">this page needs JavaScript to work</td></tr>
+		<tr><td colspan="0" style="text-align:center;">this page needs JavaScript to work. Data will be loaded...</td></tr>
 	</tbody>
 	</table>
 </body>

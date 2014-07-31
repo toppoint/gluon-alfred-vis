@@ -2,10 +2,16 @@
 # -*- coding: UTF-8 -*-
 
 """
+This script splits all nodes in single files under logs/nodes and creates an alfred_offline.json file
+
 Syntax: python alfred-log.py < alfred.json
 """
 
-import json, sys, os
+import json, sys, os, datetime, time
+
+# timestamp to be added in alfred_offline.json
+timestamp = time.time()
+h_datetime = datetime.datetime.fromtimestamp(timestamp).strftime('%d.%m %H:%M:%S')
 
 try:
   nodes=json.load(sys.stdin)
@@ -33,5 +39,5 @@ for on_hostname in os.listdir('logs/nodes'):
 
 # offline nodes (on):
 offline=open('alfred_offline.json', 'w')
-offline.write('{%s}' % ",".join(ons))
+offline.write('{"additional_data": {"datetime": "%s", "timestamp": "%s"}, %s}' % (h_datetime, timestamp, ",".join(ons)))
 offline.close()
