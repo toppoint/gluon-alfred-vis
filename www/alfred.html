@@ -10,7 +10,7 @@
 	
 	<script type="text/javascript">
 	var arr = [];
-	
+
 	function inArray(needle, haystack) {
 		var length = haystack.length;
 		for(var i = 0; i < length; i++) {
@@ -18,9 +18,16 @@
 		}
 		return false;
 	}
-	
-	// each single node has its own json logged here:
-	path_to_node_json='http://freifunk.discovibration.de/gluon-alfred-vis/www/logs/nodes/';
+
+	function pad(number) {
+		if ( number < 10 ) {
+			return '0' + number;
+		}
+		return number;
+	}
+    
+    // each single node has its own json logged here:
+	path_to_node_json='logs/nodes/';
 
 	// all column heads:
 	var cols = [
@@ -40,7 +47,7 @@
 		"loadavg",
 		"mem"
 	];
-	
+
 	function fill_arr(key,val,offline){
 		if(key=="additional_data"){
 			// added by alfred-log.py in alfred_offline.json
@@ -90,6 +97,7 @@
 				fill_arr(key,val,1)
 				count_offline++
 			});
+			$('#subheadline').append(" "+count_offline+" offline");
 		});
 
 		// add online nodes
@@ -115,8 +123,7 @@
 
 			sortResults('hostname', true);
 
-			$('#headline').append(" "+count_online+" online");
-			$('#headline').append(" "+count_offline+" offline");
+			$('#subheadline').append(" "+count_online+" online");
 		});
 	
 	});
@@ -208,15 +215,18 @@
 		});
 		showResults();
 	}
-	var all=Object;
 	function showResults () {
 		var html = '';
 		for (var e in arr) {
-			offllineclass=(arr[e].offline==1?' class="offline"':'')
+			nodename=arr[e].hostname;
+			
+			offlineclass=(arr[e].offline==1?' class="offline"':'')
+			offlineid=(arr[e].offline==1?' id="offline_'+e+'"':'')
+			
 			html += '<tr>'
-				+'<td><a target="_blank" href="http://['+arr[e].address+']/">'+arr[e].hostname+'</a></td>'
-				+'<td'+offllineclass+'>'+Math.floor(arr[e].uptime/3600)+'h</td>'
-				+'<td'+offllineclass+'>'+(arr[e].offline?"offline":'')+'</td>'
+				+'<td><a target="_blank" href="http://['+arr[e].address+']/">'+nodename+'</a></td>'
+				+'<td'+offlineclass+'>'+Math.floor(arr[e].uptime/3600)+'h</td>'
+				+'<td'+offlineclass+offlineid+'>'+(arr[e].offline?"offline":'')+'</td>'
 				+'<td>'+Math.floor(arr[e].tx/1048576)+'</td>'
 				+'<td>'+Math.floor(arr[e].rx/1048576)+'</td>'
 				+'<td>'+arr[e].firmware+'</td>'
@@ -235,14 +245,25 @@
 					if(p!="pos") html += p + ':' + arr[e][p] + '<br>';
 				}
 			}
-			html +='<a href="'+path_to_node_json+arr[e].hostname+'" target="_blank">data</a></td>'
+			html +='<a href="'+path_to_node_json+nodename+'" target="_blank">data</a></td>'
 				+'</tr>';
 		}
+		// add last access time to offline nodes
+		var xhrs = arr.map(function(node,e) {
+			if(node.offline){
+				var nodename = node.hostname;
+				return $.ajax({
+					url: path_to_node_json + nodename
+				}).done(function(data, status, xhr) {
+					var since= new Date(xhr.getResponseHeader("Last-Modified"));
+					$('#offline_'+e).append("<br>seit: " +pad(since.getDay())+'.'+pad(since.getMonth())+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
+				});
+			}
+		});
 		$('#results').html(html);
 		$('#results').append(arr.length+" Eintr&auml;ge");
 		if(arr.length==0) alert("Fehler: kein Eintrag!");
 	}
-	
 	</script>
 </head>
 <body>
@@ -255,7 +276,7 @@
 		</ul>
 	</header>
 	<div class="container">
-	<h1 id="headline">Knotenliste</h1>
+	<h1 id="headline">Knotenliste</h1><span id="subheadline"></span>
 	<table id="list"></table>
 	</div>
 	<table id="list" class="tablesorter tablesorter-default">
