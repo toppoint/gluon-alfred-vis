@@ -100,6 +100,20 @@
 			$('#subheadline').append(" "+count_offline+" offline");
 		});
 
+		/*$.getJSON( 'nodes.json', function(data) {
+			count_offline--; // first element is "additional_data"
+			$.each( data.nodes, function( key,val ) {
+				val.hostname=val.name
+				key=val.id;
+				if(val.name=="") valname=val.id;
+				val.legacy=true
+				fill_arr(key,val,!val.flags.online)
+				count_offline++
+			});
+			$('#subheadline').append(" "+count_offline+" offline");
+		});
+		*/
+
 		// add online nodes
 		var count_online=0
 		$.getJSON( 'alfred.json', function(data) {
