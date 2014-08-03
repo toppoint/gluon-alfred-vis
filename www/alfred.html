@@ -43,7 +43,6 @@
 		"contact",
 		"longitude",
 		"latitude",
-		"autoupdate",
 		"loadavg",
 		"mem"
 	];
@@ -83,66 +82,77 @@
 			try { n.contact= ('owner' in val?val['owner']['contact']:'')								; } catch (e) {};
 			try { n.longitude= ('location' in val?val['location']['longitude']:'')						; } catch (e) {};
 			try { n.latitude= ('location' in val?val['location']['latitude']:'')						; } catch (e) {};
+			try { if(val['clientcount']) n.clientcount= val['clientcount']								; } catch (e) {};
 			try { n.mac= key																			; } catch (e) {};
 			arr.push(n);
 		}
 	}
-
+	var step=0;
+	var count_offline=0
+	var count_online=0
 	$(function() {
 		// first add offline nodes
-		var count_offline=0
 		$.getJSON( 'alfred_offline.json', function(data) {
 			count_offline--; // first element is "additional_data"
 			$.each( data, function( key,val ) {
 				fill_arr(key,val,1)
 				count_offline++
-			});
-			$('#subheadline').append(" "+count_offline+" offline");
-		});
-	});
-	$(function() {
-		// add online nodes
-		var count_online=0
-		$.getJSON( 'alfred.json', function(data) {
-			$.each( data, function( key,val ) {
-				fill_arr(key,val,0)
-				count_online++
-			});
-			
-			$('#headings th').click(function() {
-				var id = $(this).attr('id');
-				var asc = (!$(this).attr('asc')); // switch the order, true if not set
-
-				// set asc="asc" when sorted in ascending order
-				$('#headings th').each(function() {
-					$(this).removeAttr('asc');
+			})
+			$('#subheadline').append("<br>Step "+(++step)+' alfred_offline.json');
+		}).done(function(){
+			// add online nodes
+			$.getJSON( 'alfred.json', function(data) {
+				$.each( data, function( key,val ) {
+					fill_arr(key,val,0)
+					count_online++
 				});
-				if (asc) $(this).attr('asc', 'asc');
+				
+				$('#subheadline').append("<br>Step "+(++step)+' alfred.json');
+			}).done(function(){
+				// get legacy nodes
+				$.getJSON( 'nodes.json', function(data) {
+					$.each( data.nodes, function( key,val ) {
+						if(!val.flags.client && !val.firmware){
+							val.hostname=val.name
+							key=val.id;
+							if(val.name=="") val.hostname=val.id;
+							val.software=new Object()
+							val.software.firmware=new Object()
+							val.software.firmware.release='0.3'
+							val.legacy=true
+							val.software.autoupdater=new Object()
+							val.software.autoupdater.enabled=false
+							if(val.geo){
+								val.location=new Object();
+								val.location.longitude=val.geo[0];
+								val.location.latitude=val.geo[1];
+							}
+							fill_arr(key,val,!val.flags.online)
+							if (val.flags.online) count_online++
+							else count_offline++
+						}
+					});
+					$('#subheadline').append("<br>Step "+(++step)+' nodes.json');
+					$('#subheadline').append(" "+count_online+" online");
+					$('#subheadline').append(" "+count_offline+" offline");
+					$('#headings th').click(function() {
+						var id = $(this).attr('id');
+						var asc = (!$(this).attr('asc')); // switch the order, true if not set
 
-				sortResults(id, asc);
+						// set asc="asc" when sorted in ascending order
+						$('#headings th').each(function() {
+							$(this).removeAttr('asc');
+						});
+						if (asc) $(this).attr('asc', 'asc');
+
+						sortResults(id, asc);
+					});
+
+					sortResults('hostname', true);
+				});
 			});
-
-			sortResults('hostname', true);
-
-			$('#subheadline').append(" "+count_online+" online");
 		});
-	
 	});
-	/*$(function() {
-		$.getJSON( 'nodes.json', function(data) {
-			$.each( data.nodes, function( key,val ) {
-				val.hostname=val.name
-				key=val.id;
-				if(val.name=="") valname=val.id;
-				val.legacy=true
-				fill_arr(key,val,!val.flags.online)
-				if (val.flags.online) count_online++
-				else count_offline++
-			});
-			$('#subheadline').append(" "+count_offline+" offline");
-		});
-		
-	});*/
 	
 	function order(c) {
 		if (/^\d$/.test(c))
@@ -243,8 +253,8 @@
 				+'<td><a target="_blank" href="http://['+arr[e].address+']/">'+nodename+'</a></td>'
 				+'<td'+offlineclass+'>'+Math.floor(arr[e].uptime/3600)+'h</td>'
 				+'<td'+offlineclass+offlineid+'>'+(arr[e].offline?"offline":'')+'</td>'
-				+'<td>'+Math.floor(arr[e].tx/1048576)+'</td>'
-				+'<td>'+Math.floor(arr[e].rx/1048576)+'</td>'
+				+'<td>'+(arr[e].tx?(Math.floor(arr[e].tx/1048576)):'')+'</td>'
+				+'<td>'+(arr[e].rx?(Math.floor(arr[e].rx/1048576)):'')+'</td>'
 				+'<td>'+arr[e].firmware+'</td>'
 				+'<td>'+arr[e].model+'</td>'
 				+'<td>'+arr[e].mac+'</td>'
@@ -253,8 +263,8 @@
 				+'<td>'+arr[e].longitude+'</td>'
 				+'<td>'+arr[e].latitude+'</td>'
 				+'<td>'+arr[e].autoupdate+'</td>'
-				+'<td>'+arr[e].loadavg+'</td>'
-				+'<td>'+(arr[e].mem*100).toFixed(2)+'%</td>'
+				+'<td>'+(arr[e].loadavg?arr[e].loadavg:'')+'</td>'
+				+'<td>'+(arr[e].mem?(arr[e].mem*100).toFixed(2)+'%':'')+'</td>'
 				+'<td>';
 			for (var p in arr[e]) {
 				if (arr[e].hasOwnProperty(p) && !inArray(p,cols)) {
@@ -272,7 +282,7 @@
 					url: path_to_node_json + nodename
 				}).done(function(data, status, xhr) {
 					var since= new Date(xhr.getResponseHeader("Last-Modified"));
-					$('#offline_'+e).append("<br>seit: " +pad(since.getDay())+'.'+pad(since.getMonth())+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
+					$('#offline_'+e).append("<br>seit: " +pad(since.getDate())+'.'+pad(since.getMonth())+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
 				});
 			}
 		});
