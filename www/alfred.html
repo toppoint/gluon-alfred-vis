@@ -42,6 +42,7 @@
 		"autoupdate",
 		"contact",
 		"longitude",
+		"latitude",
 		"loadavg",
 		"mem"
 	];
@@ -81,8 +82,10 @@
 			try { n.contact= ('owner' in val?val['owner']['contact']:'')								; } catch (e) {};
 			try { n.longitude= ('location' in val?val['location']['longitude']:'')						; } catch (e) {};
 			try { n.latitude= ('location' in val?val['location']['latitude']:'')						; } catch (e) {};
-			try { if(val['clientcount']) n.clientcount= val['clientcount']								; } catch (e) {};
 			try { n.mac= key																			; } catch (e) {};
+			// legacy:
+			try { if(val['clientcount']) n.clientcount= val['clientcount']								; } catch (e) {};
+			try { if(val['legacy']) n.legacy= val['legacy']												; } catch (e) {};
 			arr.push(n);
 		}
 	}
@@ -126,7 +129,7 @@
 								val.location.latitude=val.geo[0];
 								val.location.longitude=val.geo[1];
 							}
-							fill_arr(key,val,!val.flags.online)
+							fill_arr(key,val, (val.flags.online?0:1))
 							if (val.flags.online) count_online++
 							else count_offline++
 						}
@@ -251,7 +254,7 @@
 			html += '<tr>'
 				+'<td><a target="_blank" href="http://['+arr[e].address+']/">'+nodename+'</a></td>'
 				+'<td'+offlineclass+'>'+Math.floor(arr[e].uptime/3600)+'h</td>'
-				+'<td'+offlineclass+offlineid+'>'+(arr[e].offline===1?"offline":'')+'</td>'
+				+'<td'+offlineclass+offlineid+'>'+(arr[e].offline===1?"offline":(arr[e].offline?arr[e].offline:''))+'</td>'
 				+'<td>'+(arr[e].tx?(Math.floor(arr[e].tx/1048576)):'')+'</td>'
 				+'<td>'+(arr[e].rx?(Math.floor(arr[e].rx/1048576)):'')+'</td>'
 				+'<td>'+arr[e].firmware+'</td>'
@@ -274,13 +277,13 @@
 		}
 		// add last access time to offline nodes
 		var xhrs = arr.map(function(node,e) {
-			if(node.offline){
+			if(node.offline && !node.legacy){
 				var nodename = node.hostname;
 				return $.ajax({
 					url: path_to_node_json + nodename
 				}).done(function(data, status, xhr) {
 					var since= new Date(xhr.getResponseHeader("Last-Modified"));
-					$('#offline_'+e).append("<br>seit: " +pad(since.getDate())+'.'+pad(since.getMonth())+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
+					$('#offline_'+e).append(" seit: " +pad(since.getDate())+'.'+pad(since.getMonth())+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
 				});
 			}
 		});
