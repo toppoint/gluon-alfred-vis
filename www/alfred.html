@@ -283,7 +283,7 @@
 					url: path_to_node_json + nodename
 				}).done(function(data, status, xhr) {
 					var since= new Date(xhr.getResponseHeader("Last-Modified"));
-					$('#offline_'+e).append(" seit: " +pad(since.getDate())+'.'+pad(since.getMonth())+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
+					$('#offline_'+e).append(" seit: " +pad(since.getDate())+'.'+pad(since.getMonth() +1)+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
 				});
 			}
 		});
