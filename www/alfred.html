@@ -42,7 +42,6 @@
 		"autoupdate",
 		"contact",
 		"longitude",
-		"latitude",
 		"loadavg",
 		"mem"
 	];
@@ -124,8 +123,8 @@
 							val.software.autoupdater.enabled=false
 							if(val.geo){
 								val.location=new Object();
-								val.location.longitude=val.geo[0];
-								val.location.latitude=val.geo[1];
+								val.location.latitude=val.geo[0];
+								val.location.longitude=val.geo[1];
 							}
 							fill_arr(key,val,!val.flags.online)
 							if (val.flags.online) count_online++
@@ -252,7 +251,7 @@
 			html += '<tr>'
 				+'<td><a target="_blank" href="http://['+arr[e].address+']/">'+nodename+'</a></td>'
 				+'<td'+offlineclass+'>'+Math.floor(arr[e].uptime/3600)+'h</td>'
-				+'<td'+offlineclass+offlineid+'>'+(arr[e].offline?"offline":'')+'</td>'
+				+'<td'+offlineclass+offlineid+'>'+(arr[e].offline===1?"offline":'')+'</td>'
 				+'<td>'+(arr[e].tx?(Math.floor(arr[e].tx/1048576)):'')+'</td>'
 				+'<td>'+(arr[e].rx?(Math.floor(arr[e].rx/1048576)):'')+'</td>'
 				+'<td>'+arr[e].firmware+'</td>'
@@ -260,10 +259,9 @@
 				+'<td>'+arr[e].mac+'</td>'
 				+'<td>'+arr[e].autoupdate+'</td>'
 				+'<td>'+arr[e].contact+'</td>'
-				+'<td>'+arr[e].longitude+'</td>'
-				+'<td>'+arr[e].latitude+'</td>'
+				+'<td>'+(arr[e].longitude?('<a href="http://freifunk.in-kiel.de/ffmap/geomap.html?lat='+arr[e].latitude+'&lon='+arr[e].longitude+'" target="_blank">'+parseFloat(arr[e].longitude).toFixed(5)+' '+parseFloat(arr[e].latitude).toFixed(5)+'</a>'):'')+'</td>'
 				+'<td>'+arr[e].autoupdate+'</td>'
-				+'<td>'+(arr[e].loadavg?arr[e].loadavg:'')+'</td>'
+				+'<td>'+(arr[e].loadavg?arr[e].loadavg:'')+'</a></td>'
 				+'<td>'+(arr[e].mem?(arr[e].mem*100).toFixed(2)+'%':'')+'</td>'
 				+'<td>';
 			for (var p in arr[e]) {
@@ -318,8 +316,7 @@
 			<th id="mac">mac</th>
 			<th id="autoupdate">autoupdate</th>
 			<th id="contact">contact</th>
-			<th id="longitude">long</th>
-			<th id="latitude">lat</th>
+			<th id="longitude">location</th>
 			<th id="autoupdate">autoupdate</th>
 			<th id="loadavg">loadavg</th>
 			<th id="mem">mem free</th>
