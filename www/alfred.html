@@ -76,7 +76,7 @@
 					n.mem= parseFloat(val['statistics']['memory'] != null?val['statistics']['memory']['free']:1.0) / parseFloat(val['statistics']['memory'] != null?val['statistics']['memory']['total']:0);
 				} catch (e) {};
 			}
-			try { n.firmware=val.software?val['software']['firmware']['release']:"-"					;} catch (e) {};
+			try { n.firmware=val.software?val['software']['firmware']['release']:(val.distribution?val.distribution:"-");} catch (e) {};
 			try { n.model= val['hardware']?val['hardware']['model']:"-"									; } catch (e) {};
 			try { n.autoupdate= val.software?(val.software.autoupdater.enabled?val.software.autoupdater.branch:''):'-'	; } catch (e) {};
 			try { n.contact= ('owner' in val?val['owner']['contact']:'')								; } catch (e) {};
