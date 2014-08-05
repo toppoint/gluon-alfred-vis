@@ -35,7 +35,13 @@ for on_hostname in os.listdir('logs/nodes'):
     on_fp=open(folder+on_hostname,'r')
     on_json=on_fp.read()
     on=json.loads(on_json)
-    ons.append('"%s":%s' % (on["network"]["mac"], on_json))
+    if not 'distribution' in on:
+      try:
+        ons.append('"%s":%s' % (on["network"]["mac"], on_json))
+      except:
+        print on
+        sys.exit('ERROR: ["network"]["mac"] not in JSON object')
+
 
 # offline nodes (on):
 offline=open('alfred_offline.json', 'w')
