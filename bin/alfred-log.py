@@ -22,6 +22,8 @@ folder='logs/nodes/'
 hostnames=[]
 # write all nodes in separate files under logs/nodes/
 for i in nodes:
+  nodes[i]['last_seen_h']=h_datetime
+  nodes[i]['last_seen']=timestamp
   with open(folder+nodes[i]['hostname'], 'w') as fp:
     json.dump(nodes[i], fp)
     fp.close()

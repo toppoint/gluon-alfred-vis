@@ -39,4 +39,6 @@ ${BINPATH}/alfred-log.py < alfred.json
 # optional download legacy nodes.json
 if [ "$LEGACY_URL" != "" ]; then
 	curl -o nodes.json "$LEGACY_URL"
+	cp nodes.json logs/nodes_$(date +%y%m%d-%H%M%S).json
+	${BINPATH}/nodes-log.py < nodes.json
 fi

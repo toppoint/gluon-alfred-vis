@@ -7,4 +7,5 @@ The file `alfred.json` will be regularly downloaded into the `www` folder of thi
 The files `alfred-log.py` and `update-json.sh` from the `bin` folder have to stay in the same folder for example `/opt/ff/gluon-alfred-vis/bin/`.
 
  + *git repository:* https://github.com/ffnord/gluon-alfred-vis
- + *online version:* http://freifunk.discovibration.de/gluon-alfred-vis/www/alfred.html
+ + *online version Kiel:* http://freifunk.discovibration.de/gluon-alfred-vis/www/alfred.html
+ + *online version Hamburg:* http://freifunk.discovibration.de/ffhh/www/alfred.html

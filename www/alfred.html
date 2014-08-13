@@ -27,7 +27,8 @@
 	}
     
     // each single node has its own json logged here:
-	path_to_node_json='logs/nodes/';
+	path_to_nodes_json='logs/nodes/';
+	path_to_nodes_legacy_json='logs/nodes_legacy/';
 
 	// all column heads:
 	var cols = [
@@ -272,7 +273,7 @@
 					if(p!="pos") html += p + ':' + arr[e][p] + '<br>';
 				}
 			}
-			html +='<a href="'+path_to_node_json+nodename+'" target="_blank">data</a></td>'
+			html +='<a href="'+path_to_nodes_json+nodename+'" target="_blank">data</a></td>'
 				+'</tr>';
 		}
 		// add last access time to offline nodes
@@ -280,7 +281,15 @@
 			if(node.offline && !node.legacy){
 				var nodename = node.hostname;
 				return $.ajax({
-					url: path_to_node_json + nodename
+					url: path_to_nodes_json + nodename
+				}).done(function(data, status, xhr) {
+					var since= new Date(xhr.getResponseHeader("Last-Modified"));
+					$('#offline_'+e).append(" seit: " +pad(since.getDate())+'.'+pad(since.getMonth() +1)+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
+				});
+			}else if(node.offline && node.legacy){
+				var nodename = node.hostname;
+				return $.ajax({
+					url: path_to_nodes_legacy_json + nodename
 				}).done(function(data, status, xhr) {
 					var since= new Date(xhr.getResponseHeader("Last-Modified"));
 					$('#offline_'+e).append(" seit: " +pad(since.getDate())+'.'+pad(since.getMonth() +1)+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
