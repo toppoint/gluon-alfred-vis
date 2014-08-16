@@ -93,26 +93,28 @@
 	var step=0;
 	var count_offline=0
 	var count_online=0
+	var count_offline_seen=0
+	var count_legacy=0
 	$(function() {
 		// first add offline nodes
+		$('#subheadline').append("<br>Step "+(++step)+' alfred_offline.json');
 		$.getJSON( 'alfred_offline.json', function(data) {
 			count_offline--; // first element is "additional_data"
 			$.each( data, function( key,val ) {
 				fill_arr(key,val,1)
 				count_offline++
 			})
-			$('#subheadline').append("<br>Step "+(++step)+' alfred_offline.json');
 		}).done(function(){
 			// add online nodes
+			$('#subheadline').append("<br>Step "+(++step)+' alfred.json');
 			$.getJSON( 'alfred.json', function(data) {
 				$.each( data, function( key,val ) {
 					fill_arr(key,val,0)
 					count_online++
 				});
-				
-				$('#subheadline').append("<br>Step "+(++step)+' alfred.json');
 			}).done(function(){
 				// get legacy nodes
+				$('#subheadline').append("<br>Step "+(++step)+' nodes.json');
 				$.getJSON( 'nodes.json', function(data) {
 					$.each( data.nodes, function( key,val ) {
 						if(!val.flags.client && !val.firmware){
@@ -131,13 +133,14 @@
 								val.location.longitude=val.geo[1];
 							}
 							fill_arr(key,val, (val.flags.online?0:1))
-							if (val.flags.online) count_online++
-							else count_offline++
+							if (val.flags.online) count_online++;
+							else count_offline++;
+							count_legacy++;
 						}
 					});
-					$('#subheadline').append("<br>Step "+(++step)+' nodes.json');
-					$('#subheadline').append(" "+count_online+" online");
-					$('#subheadline').append(" "+count_offline+" offline");
+					$('#subheadline').html('');
+					$('#subheadline').append(" "+count_online+" online von "+(count_offline+count_online)+"");
+					$('#subheadline').append("<br>"+count_legacy+" haben noch kein gluon (legacy node)");
 					$('#headings th').click(function() {
 						var id = $(this).attr('id');
 						var asc = (!$(this).attr('asc')); // switch the order, true if not set
@@ -277,6 +280,7 @@
 				+'</tr>';
 		}
 		// add last access time to offline nodes
+		count_offline_seen=0;
 		var xhrs = arr.map(function(node,e) {
 			if(node.offline && !node.legacy){
 				var nodename = node.hostname;
@@ -287,18 +291,25 @@
 					$('#offline_'+e).append(" seit: " +pad(since.getDate())+'.'+pad(since.getMonth() +1)+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
 				});
 			}else if(node.offline && node.legacy){
+				// legacy offline nodes
 				var nodename = node.hostname;
 				return $.ajax({
 					url: path_to_nodes_legacy_json + nodename
 				}).done(function(data, status, xhr) {
 					var since= new Date(xhr.getResponseHeader("Last-Modified"));
-					$('#offline_'+e).append(" seit: " +pad(since.getDate())+'.'+pad(since.getMonth() +1)+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
+					$('#offline_'+e).html("zuletzt: " +pad(since.getDate())+'.'+pad(since.getMonth() +1)+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
+					count_offline_seen++;
 				});
 			}
 		});
+		setTimeout('show_last_seen()',3000);
+		
 		$('#results').html(html);
 		$('#results').append(arr.length+" Eintr&auml;ge");
 		if(arr.length==0) alert("Fehler: kein Eintrag!");
+	}
+	function show_last_seen(){
+		$('#subheadline').append("<br>aber "+count_offline_seen+" der legacy nodes waren nach dem 1.8.2014 zuletzt online");
 	}
 	</script>
 </head>
