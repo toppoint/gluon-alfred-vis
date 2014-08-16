@@ -93,7 +93,8 @@
 	var step=0;
 	var count_offline=0
 	var count_online=0
-	var count_offline_seen=0
+	var count_legacy_offline_seen=0
+	var count_legacy_online=0
 	var count_legacy=0
 	$(function() {
 		// first add offline nodes
@@ -133,14 +134,16 @@
 								val.location.longitude=val.geo[1];
 							}
 							fill_arr(key,val, (val.flags.online?0:1))
-							if (val.flags.online) count_online++;
-							else count_offline++;
+							if (val.flags.online) {
+								count_legacy_online++;
+								count_online++;
+							} else count_offline++;
 							count_legacy++;
 						}
 					});
 					$('#subheadline').html('');
 					$('#subheadline').append(" "+count_online+" online von "+(count_offline+count_online)+"");
-					$('#subheadline').append("<br>"+count_legacy+" haben noch kein gluon (legacy node)");
+					$('#subheadline').append("<br>"+count_legacy+" haben noch kein gluon (legacy node), davon "+count_legacy_online+" online");
 					$('#headings th').click(function() {
 						var id = $(this).attr('id');
 						var asc = (!$(this).attr('asc')); // switch the order, true if not set
@@ -280,7 +283,7 @@
 				+'</tr>';
 		}
 		// add last access time to offline nodes
-		count_offline_seen=0;
+		count_legacy_offline_seen=0;
 		var xhrs = arr.map(function(node,e) {
 			if(node.offline && !node.legacy){
 				var nodename = node.hostname;
@@ -298,7 +301,7 @@
 				}).done(function(data, status, xhr) {
 					var since= new Date(xhr.getResponseHeader("Last-Modified"));
 					$('#offline_'+e).html("zuletzt: " +pad(since.getDate())+'.'+pad(since.getMonth() +1)+'. '+ pad(since.getHours())+':'+pad(since.getMinutes()));
-					count_offline_seen++;
+					count_legacy_offline_seen++;
 				});
 			}
 		});
@@ -309,7 +312,7 @@
 		if(arr.length==0) alert("Fehler: kein Eintrag!");
 	}
 	function show_last_seen(){
-		$('#subheadline').append("<br>aber "+count_offline_seen+" der legacy nodes waren nach dem 1.8.2014 zuletzt online");
+		$('#subheadline').append("<br>aber "+count_legacy_offline_seen+" der offline legacy nodes waren nach dem 1.8.2014 zuletzt online");
 	}
 	</script>
 </head>
