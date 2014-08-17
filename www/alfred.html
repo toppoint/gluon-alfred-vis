@@ -29,7 +29,8 @@
     // each single node has its own json logged here:
 	path_to_nodes_json='logs/nodes/';
 	path_to_nodes_legacy_json='logs/nodes_legacy/';
-
+	siteurl='http://freifunk.in-kiel.de'
+	
 	// all column heads:
 	var cols = [
 		"hostname", 
@@ -142,8 +143,10 @@
 						}
 					});
 					$('#subheadline').html('');
-					$('#subheadline').append(" "+count_online+" online von "+(count_offline+count_online)+"");
-					$('#subheadline').append("<br>"+count_legacy+" haben noch kein gluon (legacy node), davon "+count_legacy_online+" online");
+					count_total=(count_offline+count_online);
+					$('#subheadline').append(" "+count_online+" Knoten online von "+count_total+"");
+					$('#subheadline').append("<br>"+(count_online-count_legacy_online)+" aktuelle online von "+(count_total-count_legacy)+"");
+					$('#subheadline').append("<br>"+(count_legacy_online)+" legacy online von "+count_legacy+"");
 					$('#headings th').click(function() {
 						var id = $(this).attr('id');
 						var asc = (!$(this).attr('asc')); // switch the order, true if not set
@@ -264,12 +267,14 @@
 				+'<td'+offlineclass+offlineid+'>'+(arr[e].offline===1?"offline":(arr[e].offline?arr[e].offline:''))+'</td>'
 				+'<td>'+(arr[e].tx?(Math.floor(arr[e].tx/1048576)):'')+'</td>'
 				+'<td>'+(arr[e].rx?(Math.floor(arr[e].rx/1048576)):'')+'</td>'
-				+'<td>'+arr[e].firmware+'</td>'
+				+'<td>'+arr[e].firmware;
+			if(arr[e].firmware==0.3) html += ' <a href="'+siteurl+'/wiki/Nodes/'+nodename+'" target="_blank">mehr</a>';
+			html +='</td>'
 				+'<td>'+arr[e].model+'</td>'
 				+'<td>'+arr[e].mac+'</td>'
 				+'<td>'+arr[e].autoupdate+'</td>'
 				+'<td>'+arr[e].contact+'</td>'
-				+'<td>'+(arr[e].longitude?('<a href="http://freifunk.in-kiel.de/ffmap/geomap.html?lat='+arr[e].latitude+'&lon='+arr[e].longitude+'" target="_blank">'+parseFloat(arr[e].longitude).toFixed(5)+' '+parseFloat(arr[e].latitude).toFixed(5)+'</a>'):'')+'</td>'
+				+'<td>'+(arr[e].longitude?('<a href="'+siteurl+'/ffmap/geomap.html?lat='+arr[e].latitude+'&lon='+arr[e].longitude+'" target="_blank">'+parseFloat(arr[e].longitude).toFixed(5)+' '+parseFloat(arr[e].latitude).toFixed(5)+'</a>'):'')+'</td>'
 				+'<td>'+arr[e].autoupdate+'</td>'
 				+'<td>'+(arr[e].loadavg?arr[e].loadavg:'')+'</a></td>'
 				+'<td>'+(arr[e].mem?(arr[e].mem*100).toFixed(2)+'%':'')+'</td>'
@@ -312,7 +317,7 @@
 		if(arr.length==0) alert("Fehler: kein Eintrag!");
 	}
 	function show_last_seen(){
-		$('#subheadline').append("<br>aber "+count_legacy_offline_seen+" der offline legacy nodes waren nach dem 1.8.2014 zuletzt online");
+		$('#subheadline').append("<br>"+count_legacy_offline_seen+" der offline legacy nodes waren nach dem 1.8.2014 zuletzt online");
 	}
 	</script>
 </head>
