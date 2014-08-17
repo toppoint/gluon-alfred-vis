@@ -47,5 +47,9 @@ for on_hostname in os.listdir('logs/nodes'):
 
 # offline nodes (on):
 offline=open('alfred_offline.json', 'w')
-offline.write('{"additional_data": {"datetime": "%s", "timestamp": "%s"}, %s}' % (h_datetime, timestamp, ",".join(ons)))
+joined_ons=",".join(ons)
+# if there are no offline nodes, ",".join(ons) should return {}
+if joined_ons=='':
+  joined_ons='"0":{}'
+offline.write('{"additional_data": {"datetime": "%s", "timestamp": "%s"}, %s}' % (h_datetime, timestamp, joined_ons))
 offline.close()
