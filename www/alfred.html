@@ -29,7 +29,17 @@
     // each single node has its own json logged here:
 	path_to_nodes_json='logs/nodes/';
 	path_to_nodes_legacy_json='logs/nodes_legacy/';
+	
+	//TODO: dies anpassen, und auch die header line weiter unten
+	// ffhh
+	siteurl='http://hamburg.freifunk.net'
+	ffmap_path='nodes_ffhh/'
+	// ffhl
+	siteurl='http://luebeck.freifunk.net'
+	ffmap_path='map/'
+	// ffki
 	siteurl='http://freifunk.in-kiel.de'
+	ffmap_path="ffmap/'
 	
 	// all column heads:
 	var cols = [
@@ -268,13 +278,14 @@
 				+'<td>'+(arr[e].tx?(Math.floor(arr[e].tx/1048576)):'')+'</td>'
 				+'<td>'+(arr[e].rx?(Math.floor(arr[e].rx/1048576)):'')+'</td>'
 				+'<td>'+arr[e].firmware;
-			if(arr[e].firmware==0.3) html += ' <a href="'+siteurl+'/wiki/Nodes/'+nodename+'" target="_blank">mehr</a>';
+			// special for kiel: wiki page for legacy nodes
+			if(arr[e].firmware==0.3 && +siteurl=='http://freifunk.in-kiel.de') html += ' <a href="'+siteurl+'/wiki/Nodes/'+nodename+'" target="_blank">mehr</a>';
 			html +='</td>'
 				+'<td>'+arr[e].model+'</td>'
 				+'<td>'+arr[e].mac+'</td>'
 				+'<td>'+arr[e].autoupdate+'</td>'
 				+'<td>'+arr[e].contact+'</td>'
-				+'<td>'+(arr[e].longitude?('<a href="'+siteurl+'/ffmap/geomap.html?lat='+arr[e].latitude+'&lon='+arr[e].longitude+'" target="_blank">'+parseFloat(arr[e].longitude).toFixed(5)+' '+parseFloat(arr[e].latitude).toFixed(5)+'</a>'):'')+'</td>'
+				+'<td>'+(arr[e].longitude?('<a href="'+siteurl+'/'+ffmap_path+'geomap.html?lat='+arr[e].latitude+'&lon='+arr[e].longitude+'" target="_blank">'+parseFloat(arr[e].longitude).toFixed(5)+' '+parseFloat(arr[e].latitude).toFixed(5)+'</a>'):'')+'</td>'
 				+'<td>'+arr[e].autoupdate+'</td>'
 				+'<td>'+(arr[e].loadavg?arr[e].loadavg:'')+'</a></td>'
 				+'<td>'+(arr[e].mem?(arr[e].mem*100).toFixed(2)+'%':'')+'</td>'
