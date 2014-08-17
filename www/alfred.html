@@ -287,7 +287,7 @@
 				+'<td>'+arr[e].model+'</td>'
 				+'<td>'
 			if(site_is_ffki) html +='<a href="'+siteurl+'/'+ffmap_path+'nodeplot.cgi?'+arr[e].mac+'" target="_blank">'+arr[e].mac+'</a>'
-			else if(site_is_ffhl) html +='<a href="'+siteurl+'/'+ffmap_path+'nodes/'+arr[e].mac.replace(":","")+'.png" target="_blank">'+arr[e].mac+'</a>'
+			else if(site_is_ffhl) html +='<a href="'+siteurl+'/'+ffmap_path+'nodes/'+arr[e].mac.replace(/\:/gi,"")+'.png" target="_blank">'+arr[e].mac+'</a>'
 			else html +=arr[e].mac;	
 			html +='</td>'
 				+'<td>'+arr[e].autoupdate+'</td>'
