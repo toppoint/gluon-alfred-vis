@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FFKI - Alfred JSON Status</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="stylesheet" type="text/css" href="css/list.css" />
+    <script type="text/javascript" src="lib/frameworks/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="lib/gluon-alfred-vis.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1><a href="/" id="sitelink">kiel.freifunk.net</a></h1>
+      <ul>
+        <li><a href="http://freifunk.in-kiel.de/ffmap/graph.html">Graph</a></li>
+        <li><a href="http://freifunk.in-kiel.de/ffmap/geomap.html">Karte</a></li>
+        <li><a href="http://freifunk.in-kiel.de/ffmap/list.html">Liste</a></li>
+      </ul>
+    </header>
+    <div class="container">
+      <h1>Knotenliste</h1>
+      <table id="list"></table>
+    </div>
+    <table id="list" class="tablesorter tablesorter-default">
+      <thead id="headings">
+        <tr class="tablesorter-headerRow">
+          <th id="hostname">hostname</th>
+          <th id="uptime">uptime</th>
+          <th id="tx">tx (mb)</th>
+          <th id="rx">rx (mb)</th>
+          <th id="firmware">firmware</th>
+          <th id="model">model</th>
+          <th id="autoupdate">autoupdate</th>
+          <th id="contact">contact</th>
+          <th id="longitude">long</th>
+          <th id="latitude">lat</th>
+        </tr>
+      </thead>
+      <tbody id="results">
+        <!-- this will be auto-populated -->
+      </tbody>
+    </table>
+  </body>
+</html>
