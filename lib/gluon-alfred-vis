@@ -1,0 +1,4 @@
+# copy to /etc/cron.d/ for gluon-alfred-vis to work
+
+* * * * *  root /opt/alfred-json/alfred-json -r 158 -z > /var/www/alfred-158.json
+* * * * *  root /opt/alfred-json/alfred-json -r 159 -z > /var/www/alfred-159.json
