@@ -43,3 +43,8 @@
 #list tfoot td {
   font-weight: bold;
 }
+
+.contact-row{
+	max-width:350px;
+	overflow:hidden;
+}
