@@ -33,11 +33,11 @@
 }
 
 #list tbody tr td:nth-child(2) {
-  background: lightpink;
+  background: lightgreen;
 }
 
-#list tbody tr.online td:nth-child(2) {
-  background: lightgreen;
+.offline {
+  background: #FFB6C1 !important;
 }
 
 #list tfoot td {
